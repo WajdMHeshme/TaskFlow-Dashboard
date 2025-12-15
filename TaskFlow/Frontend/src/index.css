@@ -1,0 +1,32 @@
+@import "tailwindcss";
+@source "../index.html";
+@source "./**/*.{js,ts,jsx,tsx}";
+
+@theme {
+  /* Greens / primary */
+  --green-dark: #0f5930;
+  --green: #0fe07a;
+  --green-light: #11e079;
+
+  /* Dark backgrounds */
+  --bg-dark: #071612;
+  --bg-form: #09221a;
+  --bg-card: #071c14;
+  --bg-side: #063022;
+
+  /* Texts */
+  --text-white: #ffffff;
+  --text-muted: #94a3b8;
+  --text-secondary: #64748b;
+
+  /* Chart / highlight */
+  --chart-accent: #00ff77;
+
+  /* Avatar gradients */
+  --avatar-1: #f9d29b;
+  --avatar-2: #e6c498;
+  --avatar-3: #f0e9d8;
+  --avatar-4: #d6caa6;
+  --avatar-5: #bdb8a3;
+  --avatar-6: #a69f88;
+}
