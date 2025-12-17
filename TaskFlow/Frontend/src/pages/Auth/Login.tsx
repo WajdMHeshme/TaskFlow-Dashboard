@@ -1,24 +1,47 @@
-import React, { useState } from "react";
+import React, { useState, type JSX } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { login } from "../../api/api";
 
-// TaskMasterLogin.tsx
-// React + TypeScript + Tailwind single-file component
-// Default export a component you can drop into any React app (Vite / Create React App / Next.js)
-
-export default function TaskMasterLogin() {
+export default function TaskMasterLogin(): JSX.Element {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // handle sign in (demo only)
-    console.log({ email, password, remember });
-    alert("Sign in clicked (demo)");
+    setLoading(true);
+
+    try {
+      const res = await login(email, password);
+      const user = res?.data?.user;
+      const token = res?.data?.token;
+
+      if (!token) throw new Error("No token returned from server");
+
+      if (remember) localStorage.setItem("token", token);
+      else sessionStorage.setItem("token", token);
+
+      if (user) localStorage.setItem("user", JSON.stringify(user));
+
+      navigate("/dashboard");
+    } catch (err: any) {
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.errors ||
+        err?.message ||
+        "Login failed";
+      alert(msg);
+      console.error("Login error:", err);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
-    <div className="ؤ">
+    <div className="min-h-screen flex items-center justify-center p-6">
       <div className="max-w-5xl w-full bg-gradient-to-r from-black/40 to-black/20 rounded-2xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
         {/* LEFT: Form */}
         <div className="p-10 md:p-12 bg-[linear-gradient(180deg,#09221a,rgba(0,0,0,0.35))]">
@@ -89,16 +112,17 @@ export default function TaskMasterLogin() {
 
             <button
               type="submit"
-              className="w-full inline-flex items-center justify-center cursor-pointer gap-2 rounded-full bg-gradient-to-r from-[#0fe07a] to-[#11e079] text-black px-6 py-3 font-semibold shadow-[0_10px_30px_rgba(16,185,129,0.18)] hover:brightness-105 focus:outline-none"
+              disabled={loading}
+              className={`w-full inline-flex items-center justify-center cursor-pointer gap-2 rounded-full bg-gradient-to-r from-[#0fe07a] to-[#11e079] text-black px-6 py-3 font-semibold shadow-[0_10px_30px_rgba(16,185,129,0.18)] hover:brightness-105 focus:outline-none ${loading ? "opacity-60 cursor-not-allowed" : ""}`}
             >
-              Sign In
+              {loading ? "Signing in..." : "Sign In"}
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h14M12 5l7 7-7 7" />
               </svg>
             </button>
 
             <div className="pt-4">
-              <p className="text-center text-sm text-slate-400">Don't have an account? <a href="#" className="text-green-300 font-medium hover:underline">Sign up for free</a></p>
+              <p className="text-center text-sm text-slate-400">Don't have an account?  <Link className="text-emerald-400" to={"/register"}>Sign Up</Link></p>
             </div>
           </form>
 
@@ -106,7 +130,7 @@ export default function TaskMasterLogin() {
         </div>
 
         {/* RIGHT: Marketing / Illustration */}
-        <div className="p-8 md:p-12 bg-[radial-gradient(ellipse_at_top_right,_#063022,_transparent_40%)] flex items-center justify-center">
+        <div className="p-8 md:p-12 bg-[radial-gradient(ellipse_at_top_right,#063022,transparent_40%)] flex items-center justify-center">
           <div className="w-full max-w-md">
             <div className="rounded-2xl p-5 bg-gradient-to-b from-[#071c14]/60 to-transparent shadow-lg">
               <div className="flex items-center justify-between mb-4">
