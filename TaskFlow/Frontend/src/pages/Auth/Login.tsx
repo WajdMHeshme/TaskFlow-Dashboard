@@ -10,39 +10,48 @@ export default function TaskMasterLogin(): JSX.Element {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
+async function handleSubmit(e: React.FormEvent) {
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      const res = await login(email, password);
-      const user = res?.data?.user;
-      const token = res?.data?.token;
+  try {
+    const res = await login(email, password);
 
-      if (!token) throw new Error("No token returned from server");
+    // Laravel response shape
+    const user = res?.data?.user;
+    const token = res?.data?.token;
 
-      if (remember) localStorage.setItem("token", token);
-      else sessionStorage.setItem("token", token);
+    if (!token) throw new Error("No token returned from server");
 
-      if (user) localStorage.setItem("user", JSON.stringify(user));
-
-      navigate("/dashboard");
-    } catch (err: any) {
-      const msg =
-        err?.response?.data?.message ||
-        err?.response?.data?.errors ||
-        err?.message ||
-        "Login failed";
-      alert(msg);
-      console.error("Login error:", err);
-    } finally {
-      setLoading(false);
+    if (remember) {
+      localStorage.setItem("token", token);
+    } else {
+      sessionStorage.setItem("token", token);
     }
+
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    }
+
+    navigate("/dashboard", { replace: true });
+  } catch (err: any) {
+    const msg =
+      err?.response?.data?.message ||
+      err?.response?.data?.errors ||
+      err?.message ||
+      "Login failed";
+
+    alert(msg);
+    console.error("Login error:", err);
+  } finally {
+    setLoading(false);
   }
+}
+
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
-      <div className="max-w-5xl w-full bg-gradient-to-r from-black/40 to-black/20 rounded-2xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
+      <div className="max-w-5xl w-full bg-linear-to-r from-black/40 to-black/20 rounded-2xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
         {/* LEFT: Form */}
         <div className="p-10 md:p-12 bg-[linear-gradient(180deg,#09221a,rgba(0,0,0,0.35))]">
           <div className="flex items-center gap-3 mb-6">
@@ -149,9 +158,9 @@ export default function TaskMasterLogin(): JSX.Element {
 
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex -space-x-2">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#f9d29b] to-[#e6c498] ring-1 ring-black/30"></div>
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#f0e9d8] to-[#d6caa6] ring-1 ring-black/30"></div>
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#bdb8a3] to-[#a69f88] ring-1 ring-black/30"></div>
+                  <div className="w-8 h-8 rounded-full bg-linear-to-r from-[#f9d29b] to-[#e6c498] ring-1 ring-black/30"></div>
+                  <div className="w-8 h-8 rounded-full bg-linear-to-r from-[#f0e9d8] to-[#d6caa6] ring-1 ring-black/30"></div>
+                  <div className="w-8 h-8 rounded-full bg-linear-to-r from-[#bdb8a3] to-[#a69f88] ring-1 ring-black/30"></div>
                 </div>
                 <div className="text-slate-100 font-bold text-lg">Manage projects with <span className="text-[#0fe07a]">clarity</span> &amp; speed.</div>
               </div>

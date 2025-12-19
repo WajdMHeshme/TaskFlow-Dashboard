@@ -1,5 +1,7 @@
+// src/components/TaskMasterRegister.tsx
 import React, { useRef, useState, type JSX } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { register } from "../../api/api"; // تأكد من المسار الصحيح إلى ملف api.ts
 
 export default function TaskMasterRegister(): JSX.Element {
   const [fullName, setFullName] = useState("");
@@ -8,19 +10,25 @@ export default function TaskMasterRegister(): JSX.Element {
   const [confirm, setConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [photo, setPhoto] = useState<string | null>(null);
+
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
+
   const [agree, setAgree] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const fileRef = useRef<HTMLInputElement | null>(null);
+  const navigate = useNavigate();
 
   function scorePassword(pw: string) {
     let score = 0;
     if (!pw) return 0;
     if (pw.length >= 8) score++;
     if (pw.length >= 12) score++;
-    if (/[A-Z]/.test(pw)) score++; // uppercase
+    if (/[A-Z]/.test(pw)) score++;
     if (/[0-9]/.test(pw)) score++;
-    if (/[^A-Za-z0-9]/.test(pw)) score++; // symbols
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
     return Math.min(score, 5);
   }
 
@@ -39,19 +47,23 @@ export default function TaskMasterRegister(): JSX.Element {
     const f = e.target.files && e.target.files[0];
     if (!f) return;
     setFileName(f.name);
+    setPhotoFile(f);
+
     const reader = new FileReader();
-    reader.onload = (ev) => setPhoto(ev.target?.result as string);
+    reader.onload = (ev) => setPhotoPreview(ev.target?.result as string);
     reader.readAsDataURL(f);
   }
 
   function clearPhoto() {
-    setPhoto(null);
+    setPhotoPreview(null);
+    setPhotoFile(null);
     setFileName(null);
     if (fileRef.current) fileRef.current.value = "";
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
     if (!fullName.trim() || !email.trim()) {
       alert("Please fill in name and email.");
       return;
@@ -69,17 +81,67 @@ export default function TaskMasterRegister(): JSX.Element {
       return;
     }
 
-    // demo only: DO NOT log real passwords in production
-    console.log({ fullName, email, photo, password });
-    alert(`Account created for ${fullName} (demo)`);
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("name", fullName);
+      formData.append("email", email);
+      formData.append("password", password);
+      formData.append("password_confirmation", confirm);
+      if (photoFile) formData.append("photo", photoFile);
 
-    // reset
-    setFullName("");
-    setEmail("");
-    setPassword("");
-    setConfirm("");
-    clearPhoto();
-    setAgree(false);
+      // call API
+      const res = await register(formData);
+
+      /**
+       * possible shapes:
+       * 1) api.register returns res.data which is:
+       *    { message, data: { user, token } }
+       * 2) api.register returns res.data which is:
+       *    { message, user, token }  (less likely)
+       * 3) any other variant — we try to be defensive
+       */
+      const top = res ?? {}; // res is likely res.data (because api.register returns res.data)
+      // try to reach the nested data object
+      const dataLayer = top.data ?? top;
+      const payload = dataLayer.data ?? dataLayer; // covers double-wrapped case
+      const user = payload?.user;
+      const token = payload?.token;
+
+      if (token && user) {
+        // store token + user so interceptor in src/api/api.ts will pick token
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(user));
+
+        // redirect to dashboard
+        navigate("/dashboard", { replace: true });
+      } else {
+        console.log("register response (unexpected):", res);
+        alert(top.message ?? "Registered, but couldn't log you in automatically.");
+        navigate("/login", { replace: true });
+      }
+
+      // reset form
+      setFullName("");
+      setEmail("");
+      setPassword("");
+      setConfirm("");
+      clearPhoto();
+      setAgree(false);
+    } catch (err: any) {
+      console.error("register error", err);
+      const resp = err?.response?.data;
+      if (resp?.errors) {
+        const msgs = Object.values(resp.errors).flat().join("\n");
+        alert(msgs);
+      } else if (resp?.message) {
+        alert(resp.message);
+      } else {
+        alert("Registration failed. Check console for details.");
+      }
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -102,8 +164,8 @@ export default function TaskMasterRegister(): JSX.Element {
               <span className="text-sm text-slate-300">Profile photo (optional)</span>
               <div className="mt-3 flex items-center gap-4">
                 <div className="w-16 h-16 rounded-full bg-emerald-900/30 flex items-center justify-center overflow-hidden">
-                  {photo ? (
-                    <img src={photo} alt="avatar" className="w-full h-full object-cover" />
+                  {photoPreview ? (
+                    <img src={photoPreview} alt="avatar" className="w-full h-full object-cover" />
                   ) : (
                     <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z" fill="#9EE7C5" />
@@ -123,7 +185,7 @@ export default function TaskMasterRegister(): JSX.Element {
                       Choose file
                     </button>
                     <span className="text-sm text-emerald-200/60">{fileName ? fileName : "No file chosen"}</span>
-                    {photo && (
+                    {photoPreview && (
                       <button type="button" onClick={clearPhoto} className="text-xs text-slate-300 underline">Remove</button>
                     )}
                   </div>
@@ -233,9 +295,10 @@ export default function TaskMasterRegister(): JSX.Element {
 
             <button
               type="submit"
-              className="w-full inline-flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-[#0fe07a] to-[#11e079] text-black px-6 py-3 md:py-4 font-semibold shadow-[0_10px_30px_rgba(16,185,129,0.18)] hover:brightness-105 focus:outline-none text-sm md:text-base"
+              disabled={loading}
+              className="w-full inline-flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-[#0fe07a] to-[#11e079] text-black px-6 py-3 md:py-4 font-semibold shadow-[0_10px_30px_rgba(16,185,129,0.18)] hover:brightness-105 focus:outline-none text-sm md:text-base disabled:opacity-60"
             >
-              Create account
+              {loading ? "Creating..." : "Create account"}
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:h-5 md:w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h14M12 5l7 7-7 7" />
               </svg>

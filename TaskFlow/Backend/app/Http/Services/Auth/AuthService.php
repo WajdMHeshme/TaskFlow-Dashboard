@@ -12,18 +12,26 @@ use Illuminate\Support\Facades\Mail;
 class AuthService
 {
 
-    public function register($request)
-    {
-        $data = $request->validated();
-        $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'role' => $data['role'] ?? 'user',
-            'password' => Hash::make($data['password'])
-        ]);
-        Mail::to($user->email)->send(new WelcomeMail($user->name));
-        return $user;
-    }
+public function register($request)
+{
+    $data = $request->validated();
+
+    $user = User::create([
+        'name' => $data['name'],
+        'email' => $data['email'],
+        'role' => $data['role'] ?? 'user',
+        'password' => Hash::make($data['password']),
+    ]);
+
+    Mail::to($user->email)->send(new WelcomeMail($user->name));
+    $token = $user->createToken('auth_token')->plainTextToken;
+
+    return [
+        'user' => $user,
+        'token' => $token,
+    ];
+}
+
 
     public function login($request)
     {

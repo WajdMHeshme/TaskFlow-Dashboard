@@ -4,27 +4,14 @@ import AuthLayout from "../pages/Auth/AuthLayout";
 import Login from "../pages/Auth/Login";
 import Register from "../pages/Auth/Register";
 import DashboardLayout from "../layout/DashboardLayout";
-
-
-
-const isAuthenticated = () => {
-  return (
-    !!localStorage.getItem("token") ||
-    !!sessionStorage.getItem("token")
-  );
-};
+import ProtectedRoute from "./protected/ProtectedRoute";
 
 const router = createBrowserRouter([
   {
     element: <App />,
     children: [
-      // redirect root
-      {
-        index: true,
-        element: <Navigate to="/login" replace />,
-      },
+      { index: true, element: <Navigate to="/login" replace /> },
 
-      // Auth pages
       {
         element: <AuthLayout />,
         children: [
@@ -33,19 +20,15 @@ const router = createBrowserRouter([
         ],
       },
 
-      // Protected Dashboard
       {
         path: "dashboard",
-        element: isAuthenticated() ? (
-          <DashboardLayout children={undefined} />
-        ) : (
-          <Navigate to="/login" replace />
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout children={undefined} />
+          </ProtectedRoute>
         ),
         children: [
-          // { index: true, element: <DashboardHome /> },
-          // لاحقًا:
-          // { path: "projects", element: <Projects /> },
-          // { path: "tasks", element: <Tasks /> },
+          // هنا sub-routes للداشبورد
         ],
       },
     ],

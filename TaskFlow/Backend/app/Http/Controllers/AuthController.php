@@ -23,10 +23,14 @@ class AuthController extends Controller
 
     public function register(RegisterRequest $request)
     {
-        $user = $this->authService->register($request);
+        $data = $this->authService->register($request);
+
         return response()->json([
             'message' => 'User Registered successfuly',
-            'user' => new RegisterUserResource($user)
+            'data' => [
+                'user' => new RegisterUserResource($data['user']), // فقط الـ user
+                'token' => $data['token'],
+            ]
         ], 201);
     }
 
