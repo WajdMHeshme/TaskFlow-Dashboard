@@ -23,12 +23,15 @@ class WelcomeMail extends Mailable
     /**
      * Build the message.
      */
-    public function build()
-    {
-        return $this->subject('Welcome To TaskFlow Dashboard Application!')
-                    ->view('emails.welcomeMail')
-                    ->with([
-                        'userName' => $this->userName,
-                    ]);
-    }
+public function build()
+{
+    return $this->subject('Welcome To TaskFlow Dashboard Application!')
+                ->view('emails.welcomeMail')
+                ->with([
+                    'userName' => $this->userName,
+                ]);
+}
+
+
+
 }

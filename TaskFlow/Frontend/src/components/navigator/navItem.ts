@@ -1,22 +1,20 @@
-// navItems.ts
-
 import type { IconType } from "react-icons";
-import { AiOutlineHome, AiOutlineFolder, AiOutlineCheckCircle, AiOutlineTeam, AiOutlineSetting } from "react-icons/ai";
-import { FaTrash } from "react-icons/fa";
+import { AiOutlineFolder, AiOutlineCheckCircle, AiOutlineSetting } from "react-icons/ai";
 import { IoTrashSharp } from "react-icons/io5";
+import { MdDashboard } from "react-icons/md";
 import { TbTagStarred } from "react-icons/tb";
 
 export interface NavItem {
-  name: string;
+  nameKey: string; // مفتاح الترجمة
   path: string;
   icon: IconType;
 }
 
 export const navItems: NavItem[] = [
-  { name: "Overview", path: "/dashboard", icon: AiOutlineHome },
-  { name: "Projects", path: "/dashboard/projects", icon: AiOutlineFolder },
-  { name: "Tasks", path: "/dashboard/tasks", icon: AiOutlineCheckCircle },
-  { name: "Trash", path: "/dashboard/team", icon: IoTrashSharp   },
-  { name: "Starred", path: "/dashboard/team", icon: TbTagStarred    },
-  { name: "Settings", path: "/dashboard/settings", icon: AiOutlineSetting },
+  { nameKey: "dashboard", path: "/dashboard", icon: MdDashboard },
+  { nameKey: "projects", path: "/dashboard/projects", icon: AiOutlineFolder },
+  { nameKey: "tasks", path: "/dashboard/tasks", icon: AiOutlineCheckCircle },
+  { nameKey: "trash", path: "/dashboard/team", icon: IoTrashSharp },
+  { nameKey: "starred", path: "/dashboard/fav", icon: TbTagStarred },
+  { nameKey: "settings", path: "/dashboard/settings", icon: AiOutlineSetting },
 ];

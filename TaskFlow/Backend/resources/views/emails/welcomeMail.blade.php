@@ -1,10 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Welcome Email</title>
+    <meta charset="UTF-8">
+    <title>Welcome to TaskFlow</title>
 </head>
 <body>
-    <h1>Hello, {{ $userName }}!</h1>
-    <p>Welcome to the TaskFlow Dashboard Application. We're excited to have you on board!</p>
+    <div style="text-align: center;">=
+
+        <h1 >Welcome, {{ $userName }}!</h1>
+        <p>Thank you for registering in TaskFlow Dashboard Application.</p>
+
+        <p>We are excited to have you on board!</p>
+    </div>
 </body>
 </html>
