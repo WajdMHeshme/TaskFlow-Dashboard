@@ -2,6 +2,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { navItems } from "../navigator/navItem";
 import { logout as apiLogout } from "../../api/api";
 import { IoExitOutline } from "react-icons/io5";
+import { showSuccess } from "../../utils/toast/toastUtils/toastUtils";
 
 type Props = {
   collapsed: boolean;
@@ -10,18 +11,18 @@ type Props = {
 const Sidebar = ({ collapsed }: Props) => {
   const navigate = useNavigate();
 
-  async function handleLogout() {
-    try {
-      await apiLogout();
-    } catch (err) {
-      console.error("Logout API error:", err);
-    } finally {
-      localStorage.clear();
-      sessionStorage.clear();
-      navigate("/login");
-    }
+async function handleLogout() {
+  try {
+    await apiLogout();
+  } catch (err) {
+    console.error("Logout API error:", err);
+  } finally {
+    localStorage.clear();
+    sessionStorage.clear();
+    showSuccess("Logged out successfully!");
+    navigate("/login");
   }
-
+}
   return (
     <aside
       className={`

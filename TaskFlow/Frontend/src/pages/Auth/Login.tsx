@@ -1,6 +1,9 @@
+// src/pages/Auth/Login.tsx  (أو نفس الملف اللي عندك)
 import React, { useState, type JSX } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { login } from "../../api/api";
+import { showError, showSuccess } from "../../utils/toast/toastUtils/toastUtils";
+
 
 export default function TaskMasterLogin(): JSX.Element {
   const [email, setEmail] = useState("");
@@ -10,44 +13,56 @@ export default function TaskMasterLogin(): JSX.Element {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-async function handleSubmit(e: React.FormEvent) {
-  e.preventDefault();
-  setLoading(true);
-
-  try {
-    const res = await login(email, password);
-
-    // Laravel response shape
-    const user = res?.data?.user;
-    const token = res?.data?.token;
-
-    if (!token) throw new Error("No token returned from server");
-
-    if (remember) {
-      localStorage.setItem("token", token);
-    } else {
-      sessionStorage.setItem("token", token);
+  const extractErrorMessage = (err: any): string => {
+    const data = err?.response?.data;
+    if (data?.message) return String(data.message);
+    if (data?.errors) {
+      const errors = data.errors;
+      // Laravel validation errors shape: { field: [msg1, msg2], ... }
+      if (typeof errors === "string") return errors;
+      if (typeof errors === "object") {
+        const first = Object.values(errors)[0];
+        if (Array.isArray(first) && first.length > 0) return String(first[0]);
+        if (typeof first === "string") return first;
+      }
     }
+    // fallback
+    return err?.message ?? " Login Faild ! ";
+  };
 
-    if (user) {
-      localStorage.setItem("user", JSON.stringify(user));
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const res = await login(email, password);
+
+      // Laravel response shape
+      const user = res?.data?.user;
+      const token = res?.data?.token;
+
+      if (!token) throw new Error("Some Thing Wrong !");
+
+      if (remember) {
+        localStorage.setItem("token", token);
+      } else {
+        sessionStorage.setItem("token", token);
+      }
+
+      if (user) {
+        localStorage.setItem("user", JSON.stringify(user));
+      }
+
+      showSuccess("Login Successfuly !"); 
+      navigate("/dashboard", { replace: true });
+    } catch (err: any) {
+      const msg = extractErrorMessage(err);
+      showError(msg); 
+      console.error("Login error:", err);
+    } finally {
+      setLoading(false);
     }
-
-    navigate("/dashboard", { replace: true });
-  } catch (err: any) {
-    const msg =
-      err?.response?.data?.message ||
-      err?.response?.data?.errors ||
-      err?.message ||
-      "Login failed";
-
-    alert(msg);
-    console.error("Login error:", err);
-  } finally {
-    setLoading(false);
   }
-}
-
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6">

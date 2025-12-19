@@ -2,6 +2,7 @@
 import React, { useRef, useState, type JSX } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { register } from "../../api/api"; // تأكد من المسار الصحيح إلى ملف api.ts
+import { showError, showSuccess } from "../../utils/toast/toastUtils/toastUtils";
 
 export default function TaskMasterRegister(): JSX.Element {
   const [fullName, setFullName] = useState("");
@@ -61,88 +62,77 @@ export default function TaskMasterRegister(): JSX.Element {
     if (fileRef.current) fileRef.current.value = "";
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+async function handleSubmit(e: React.FormEvent) {
+  e.preventDefault();
 
-    if (!fullName.trim() || !email.trim()) {
-      alert("Please fill in name and email.");
-      return;
-    }
-    if (password.length < 8) {
-      alert("Password must be at least 8 characters.");
-      return;
-    }
-    if (password !== confirm) {
-      alert("Passwords do not match.");
-      return;
-    }
-    if (!agree) {
-      alert("Please accept Terms & Conditions.");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append("name", fullName);
-      formData.append("email", email);
-      formData.append("password", password);
-      formData.append("password_confirmation", confirm);
-      if (photoFile) formData.append("photo", photoFile);
-
-      // call API
-      const res = await register(formData);
-
-      /**
-       * possible shapes:
-       * 1) api.register returns res.data which is:
-       *    { message, data: { user, token } }
-       * 2) api.register returns res.data which is:
-       *    { message, user, token }  (less likely)
-       * 3) any other variant — we try to be defensive
-       */
-      const top = res ?? {}; // res is likely res.data (because api.register returns res.data)
-      // try to reach the nested data object
-      const dataLayer = top.data ?? top;
-      const payload = dataLayer.data ?? dataLayer; // covers double-wrapped case
-      const user = payload?.user;
-      const token = payload?.token;
-
-      if (token && user) {
-        // store token + user so interceptor in src/api/api.ts will pick token
-        localStorage.setItem("token", token);
-        localStorage.setItem("user", JSON.stringify(user));
-
-        // redirect to dashboard
-        navigate("/dashboard", { replace: true });
-      } else {
-        console.log("register response (unexpected):", res);
-        alert(top.message ?? "Registered, but couldn't log you in automatically.");
-        navigate("/login", { replace: true });
-      }
-
-      // reset form
-      setFullName("");
-      setEmail("");
-      setPassword("");
-      setConfirm("");
-      clearPhoto();
-      setAgree(false);
-    } catch (err: any) {
-      console.error("register error", err);
-      const resp = err?.response?.data;
-      if (resp?.errors) {
-        const msgs = Object.values(resp.errors).flat().join("\n");
-        alert(msgs);
-      } else if (resp?.message) {
-        alert(resp.message);
-      } else {
-        alert("Registration failed. Check console for details.");
-      }
-    } finally {
-      setLoading(false);
-    }
+  if (!fullName.trim() || !email.trim()) {
+    showError("Please fill in name and email.");
+    return;
   }
+  if (password.length < 8) {
+    showError("Password must be at least 8 characters.");
+    return;
+  }
+  if (password !== confirm) {
+    showError("Passwords do not match.");
+    return;
+  }
+  if (!agree) {
+    showError("Please accept Terms & Conditions.");
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const formData = new FormData();
+    formData.append("name", fullName);
+    formData.append("email", email);
+    formData.append("password", password);
+    formData.append("password_confirmation", confirm);
+    if (photoFile) formData.append("photo", photoFile);
+
+    const res = await register(formData);
+
+    const top = res ?? {};
+    const dataLayer = top.data ?? top;
+    const payload = dataLayer.data ?? dataLayer;
+    const user = payload?.user;
+    const token = payload?.token;
+
+    if (token && user) {
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      showSuccess("Account created successfully!");
+      navigate("/dashboard", { replace: true });
+    } else {
+      console.log("register response (unexpected):", res);
+      showError(top.message ?? "Registered, but couldn't log you in automatically.");
+      navigate("/login", { replace: true });
+    }
+
+    // reset form
+    setFullName("");
+    setEmail("");
+    setPassword("");
+    setConfirm("");
+    clearPhoto();
+    setAgree(false);
+  } catch (err: any) {
+    console.error("register error", err);
+    const resp = err?.response?.data;
+    if (resp?.errors) {
+      const msgs = Object.values(resp.errors).flat().join("\n");
+      showError(msgs);
+    } else if (resp?.message) {
+      showError(resp.message);
+    } else {
+      showError("Registration failed. Check console for details.");
+    }
+  } finally {
+    setLoading(false);
+  }
+}
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
@@ -159,40 +149,6 @@ export default function TaskMasterRegister(): JSX.Element {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Profile photo */}
-            <label className="block">
-              <span className="text-sm text-slate-300">Profile photo (optional)</span>
-              <div className="mt-3 flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-emerald-900/30 flex items-center justify-center overflow-hidden">
-                  {photoPreview ? (
-                    <img src={photoPreview} alt="avatar" className="w-full h-full object-cover" />
-                  ) : (
-                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z" fill="#9EE7C5" />
-                      <path d="M4 20c0-2.21 3.582-4 8-4s8 1.79 8 4v1H4v-1z" fill="#9EE7C5" />
-                    </svg>
-                  )}
-                </div>
-
-                <div className="flex-1">
-                  <input ref={fileRef} onChange={handleFile} type="file" accept="image/*" className="hidden" />
-                  <div className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={() => fileRef.current?.click()}
-                      className="px-4 py-2 rounded-lg bg-emerald-500/90 text-black text-sm md:text-base font-medium shadow-sm hover:brightness-95"
-                    >
-                      Choose file
-                    </button>
-                    <span className="text-sm text-emerald-200/60">{fileName ? fileName : "No file chosen"}</span>
-                    {photoPreview && (
-                      <button type="button" onClick={clearPhoto} className="text-xs text-slate-300 underline">Remove</button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </label>
-
             {/* Full name */}
             <label className="block">
               <span className="text-sm text-slate-300">Full name</span>

@@ -24,15 +24,16 @@ const router = createBrowserRouter([
         path: "dashboard",
         element: (
           <ProtectedRoute>
-            <DashboardLayout children={undefined} />
+            <DashboardLayout />
           </ProtectedRoute>
         ),
         children: [
-          // هنا sub-routes للداشبورد
+          // sub-routes هنا
         ],
       },
     ],
   },
 ]);
+
 
 export default router;
