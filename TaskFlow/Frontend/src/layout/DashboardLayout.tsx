@@ -56,7 +56,7 @@ const DashboardLayout: React.FC = () => {
       <div className={`flex ${lang === "ar" ? "flex-row-reverse" : "flex-row"}`}>
         <Sidebar collapsed={collapsed} />
         <main className={`flex-1 p-6 ${mainMargin} pt-20 transition-all duration-200`}>
-          <Outlet /> {/* سيتم عرض الصفحات الفرعية هنا */}
+          <Outlet /> 
         </main>
       </div>
     </div>

@@ -30,3 +30,29 @@
   --avatar-5: #bdb8a3;
   --avatar-6: #a69f88;
 }
+
+/* scrollbar */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1A1A1A;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #0fe07a;
+  border-radius: 9999px;
+  border: 2px solid #1A1A1A;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #11ff8c;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #0fe07a #1A1A1A;
+}

@@ -5,13 +5,18 @@ import Login from "../pages/Auth/Login";
 import Register from "../pages/Auth/Register";
 import DashboardLayout from "../layout/DashboardLayout";
 import ProtectedRoute from "./protected/ProtectedRoute";
+import TasksPage from "../pages/Dashboard/TasksPage";
+ import CreateProfilePage from "../pages/Dashboard/EditeProfilePage";
+import ProfilePage from "../pages/Dashboard/ProfilePage";
 
 const router = createBrowserRouter([
   {
     element: <App />,
     children: [
+      // redirect root
       { index: true, element: <Navigate to="/login" replace /> },
 
+      // ---------- AUTH ----------
       {
         element: <AuthLayout />,
         children: [
@@ -20,6 +25,7 @@ const router = createBrowserRouter([
         ],
       },
 
+      // ---------- DASHBOARD (PROTECTED) ----------
       {
         path: "dashboard",
         element: (
@@ -28,12 +34,18 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
         children: [
-          // sub-routes هنا
+          { path: "tasks", element: <TasksPage /> },
+          {
+            path: "profile",
+            element: <ProfilePage />,
+          },
+
+          // create / edit my profile
+           { path: "profile/create", element: <CreateProfilePage /> },
         ],
       },
     ],
   },
 ]);
-
 
 export default router;
