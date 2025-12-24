@@ -1,16 +1,16 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { createProfile } from '../../api/profile.api'
+import { useCreateProfile } from '../../../lib/queries/profile.queries'
 
 export default function CreateProfilePage() {
   const navigate = useNavigate()
+  const createProfileMutation = useCreateProfile()
 
   const [name, setName] = useState('')
   const [bio, setBio] = useState('')
   const [info, setInfo] = useState('')
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
 
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -19,38 +19,41 @@ export default function CreateProfilePage() {
     if (file) setImagePreview(URL.createObjectURL(file))
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setMessage(null)
 
-    try {
-      setLoading(true)
+    const fd = new FormData()
+    fd.append('name', name)
+    fd.append('bio', bio)
+    fd.append('info', info)
+    if (imageFile) fd.append('image', imageFile)
 
-      const fd = new FormData()
-      fd.append('name', name)
-      fd.append('bio', bio)
-      fd.append('info', info)
-      if (imageFile) fd.append('image', imageFile)
+    console.log('Creating profile (FormData):', [...fd.entries()])
 
-      console.log('Creating profile:', [...fd.entries()])
-
-      const created = await createProfile(fd)
-
-      navigate(`/dashboard/profile`)
-    } catch (err: any) {
-      setMessage(err?.message ?? 'Error creating profile')
-    } finally {
-      setLoading(false)
-    }
+    createProfileMutation.mutate(fd, {
+      onSuccess: (data) => {
+        console.log('Profile created:', data)
+        navigate('/dashboard/profile')
+      },
+      onError: (err: any) => {
+        console.error('Create profile error:', err)
+        setMessage(err?.message ?? 'Error creating profile')
+      },
+    })
   }
+
+  const isLoading = createProfileMutation?.isLoading
+  const isError = createProfileMutation.isError
+  const mutationError = (createProfileMutation.error as any)?.message
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-2xl bg-[var(--bg-form)] p-8 rounded-2xl shadow-lg space-y-6"
+        className="w-full max-w-2xl bg-(--bg-form) p-8 rounded-2xl shadow-lg space-y-6"
       >
-        <h2 className="text-2xl font-semibold text-[var(--Primarylight)] text-center">
+        <h2 className="text-2xl font-semibold text-(--Primarylight) text-center">
           Create Profile
         </h2>
 
@@ -61,7 +64,7 @@ export default function CreateProfilePage() {
               value={name}
               onChange={e => setName(e.target.value)}
               required
-              className="w-full mt-1 p-2 rounded bg-[var(--bg-dark)] text-white border border-[var(--Priamrygreen)]"
+              className="w-full mt-1 p-2 rounded bg-(--bg-dark) text-white border border-(--Priamrygreen)"
             />
           </label>
 
@@ -71,7 +74,7 @@ export default function CreateProfilePage() {
               value={bio}
               onChange={e => setBio(e.target.value)}
               rows={3}
-              className="w-full mt-1 p-2 rounded bg-[var(--bg-dark)] text-white border border-[var(--Priamrygreen)]"
+              className="w-full mt-1 p-2 rounded bg-(--bg-dark) text-white border border-(--Priamrygreen)"
             />
           </label>
 
@@ -80,7 +83,7 @@ export default function CreateProfilePage() {
             <input
               value={info}
               onChange={e => setInfo(e.target.value)}
-              className="w-full mt-1 p-2 rounded bg-[var(--bg-dark)] text-white border border-[var(--Priamrygreen)]"
+              className="w-full mt-1 p-2 rounded bg-(--bg-dark) text-white border border-(--Priamrygreen)"
             />
           </label>
 
@@ -92,18 +95,20 @@ export default function CreateProfilePage() {
           {imagePreview && (
             <img
               src={imagePreview}
-              className="w-32 h-32 rounded-full object-cover mx-auto border-4 border-[var(--Priamrygreen)]"
+              className="w-32 h-32 rounded-full object-cover mx-auto border-4 border-(--Priamrygreen)"
             />
           )}
         </div>
 
-        {message && <p className="text-center text-red-400">{message}</p>}
+        {(message || isError) && (
+          <p className="text-center text-red-400">{message ?? mutationError}</p>
+        )}
 
         <button
-          disabled={loading}
-          className="w-full py-2 rounded bg-[var(--Priamrygreen)] text-black font-semibold"
+          disabled={isLoading}
+          className="w-full py-2 rounded bg-(--Priamrygreen) text-black font-semibold"
         >
-          {loading ? 'Creating...' : 'Create Profile'}
+          {isLoading ? 'Creating...' : 'Create Profile'}
         </button>
       </form>
     </div>

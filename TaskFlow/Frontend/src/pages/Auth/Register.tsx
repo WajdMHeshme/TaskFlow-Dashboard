@@ -1,6 +1,9 @@
+// src/pages/Auth/TaskMasterRegister.tsx
 import React, { useRef, useState, type JSX } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { register } from "../../api/api";
+import { fetchAndCacheCurrentUser } from "../../api/user.api";
 import { showError, showSuccess } from "../../utils/toast/toastUtils/toastUtils";
 import { useTranslation } from "react-i18next";
 
@@ -17,10 +20,10 @@ export default function TaskMasterRegister(): JSX.Element {
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [agree, setAgree] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   const fileRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   function scorePassword(pw: string) {
     let score = 0;
@@ -55,45 +58,117 @@ export default function TaskMasterRegister(): JSX.Element {
     if (fileRef.current) fileRef.current.value = "";
   }
 
+  const extractErrorMessage = (err: any): string => {
+    const data = err?.response?.data;
+    if (data?.message) return String(data.message);
+    if (data?.errors) {
+      const errors = data.errors;
+      if (typeof errors === "string") return errors;
+      if (typeof errors === "object") {
+        const first = Object.values(errors)[0];
+        if (Array.isArray(first) && first.length > 0) return String(first[0]);
+        if (typeof first === "string") return first;
+      }
+    }
+    return err?.message ?? t("create_account_btn") ?? "Registration failed";
+  };
+
+  const mutation = useMutation({
+    mutationFn: async (formData: FormData) => {
+      return await register(formData);
+    },
+    onSuccess: async (res: any) => {
+      try {
+        const data = res?.data ?? res;
+        const user = data?.user ?? data?.data?.user ?? null;
+        const token = data?.token ?? data?.data?.token ?? null;
+
+        if (!token) {
+          showError(t("registration_no_token") ?? "Registration succeeded but login failed.");
+          // still navigate to login page
+          navigate("/login", { replace: true });
+          return;
+        }
+
+        // store token + user
+        try {
+          localStorage.setItem("token", token);
+          if (user) localStorage.setItem("user", JSON.stringify(user));
+        } catch {
+          // ignore storage errors
+        }
+
+        // cache current user: either use returned user or fetch fresh
+        if (user) {
+          queryClient.setQueryData(["currentUser"], user);
+        } else {
+          try {
+            const fetched = await fetchAndCacheCurrentUser();
+            queryClient.setQueryData(["currentUser"], fetched);
+          } catch {
+            // ignore
+          }
+        }
+
+        showSuccess(t("account_created") ?? "Account created");
+        // clear form
+        setFullName("");
+        setEmail("");
+        setPassword("");
+        setConfirm("");
+        clearPhoto();
+        setAgree(false);
+
+        navigate("/dashboard", { replace: true });
+      } catch (e: any) {
+        showError(extractErrorMessage(e));
+      }
+    },
+    onError: (err: any) => {
+      console.error("Register mutation error:", err);
+      const data = err?.response?.data;
+      if (data?.errors) {
+        const msgs = Object.values(data.errors).flat();
+        showError(Array.isArray(msgs) ? msgs.join("\n") : String(msgs));
+      } else if (data?.message) {
+        showError(String(data.message));
+      } else {
+        showError(extractErrorMessage(err));
+      }
+    },
+  });
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!fullName.trim() || !email.trim()) { showError(t("fill_name_email")); return; }
-    if (password.length < 8) { showError(t("password_short")); return; }
-    if (password !== confirm) { showError(t("password_mismatch")); return; }
-    if (!agree) { showError(t("accept_terms")); return; }
 
-    setLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append("name", fullName);
-      formData.append("email", email);
-      formData.append("password", password);
-      formData.append("password_confirmation", confirm);
-      if (photoFile) formData.append("photo", photoFile);
+    if (!fullName.trim() || !email.trim()) {
+      showError(t("fill_name_email"));
+      return;
+    }
+    if (password.length < 8) {
+      showError(t("password_short"));
+      return;
+    }
+    if (password !== confirm) {
+      showError(t("password_mismatch"));
+      return;
+    }
+    if (!agree) {
+      showError(t("accept_terms"));
+      return;
+    }
 
-      const res = await register(formData);
-      const user = res?.data?.user;
-      const token = res?.data?.token;
+    const formData = new FormData();
+    formData.append("name", fullName);
+    formData.append("email", email);
+    formData.append("password", password);
+    formData.append("password_confirmation", confirm);
+    if (photoFile) formData.append("photo", photoFile);
 
-      if (token && user) {
-        localStorage.setItem("token", token);
-        localStorage.setItem("user", JSON.stringify(user));
-        showSuccess(t("account_created"));
-        navigate("/dashboard", { replace: true });
-      } else {
-        showError(res?.message ?? "Registration succeeded but login failed.");
-        navigate("/login", { replace: true });
-      }
-
-      setFullName(""); setEmail(""); setPassword(""); setConfirm(""); clearPhoto(); setAgree(false);
-    } catch (err: any) {
-      console.error("register error", err);
-      const resp = err?.response?.data;
-      if (resp?.errors) { showError(Object.values(resp.errors).flat().join("\n")); }
-      else if (resp?.message) { showError(resp.message); }
-      else { showError("Registration failed."); }
-    } finally { setLoading(false); }
+    mutation.mutate(formData);
   }
+
+  const loading = mutation.isLoading;
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
@@ -108,7 +183,6 @@ export default function TaskMasterRegister(): JSX.Element {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Full name */}
             <label className="block">
               <span className="text-sm text-slate-300">{t("full_name")}</span>
               <div className="mt-2">
@@ -116,7 +190,6 @@ export default function TaskMasterRegister(): JSX.Element {
               </div>
             </label>
 
-            {/* Email */}
             <label className="block">
               <span className="text-sm text-slate-300">{t("email")}</span>
               <div className="mt-2">
@@ -124,7 +197,6 @@ export default function TaskMasterRegister(): JSX.Element {
               </div>
             </label>
 
-            {/* Password */}
             <label className="block">
               <span className="text-sm text-slate-300">{t("password")}</span>
               <div className="mt-2 relative">
@@ -139,7 +211,6 @@ export default function TaskMasterRegister(): JSX.Element {
               </div>
             </label>
 
-            {/* Confirm */}
             <label className="block">
               <span className="text-sm text-slate-300">{t("confirm_password")}</span>
               <div className="mt-2 relative">
@@ -148,12 +219,25 @@ export default function TaskMasterRegister(): JSX.Element {
               </div>
             </label>
 
-            {/* TOS */}
             <div className="flex items-center gap-3">
               <label className="inline-flex items-center gap-2 text-slate-300 text-sm md:text-base">
                 <input type="checkbox" checked={agree} onChange={(e)=>setAgree(e.target.checked)} className="w-5 h-5 rounded text-green-400 bg-[#071612] border-gray-700"/>
                 <span className="text-sm md:text-base">{t("agree_terms")}</span>
               </label>
+            </div>
+
+            <div>
+              <label className="block text-sm text-slate-300 mb-2">{t("photo")}</label>
+              <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} />
+              {photoPreview && (
+                <div className="mt-3 flex items-center gap-3">
+                  <img src={photoPreview} alt="preview" className="w-16 h-16 rounded-full object-cover" />
+                  <div>
+                    <div className="text-sm text-slate-200">{fileName}</div>
+                    <button type="button" onClick={clearPhoto} className="text-xs text-emerald-300 hover:underline mt-1">Remove</button>
+                  </div>
+                </div>
+              )}
             </div>
 
             <button type="submit" disabled={loading} className="w-full inline-flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-[#0fe07a] to-[#11e079] text-black px-6 py-3 md:py-4 font-semibold shadow-[0_10px_30px_rgba(16,185,129,0.18)] hover:brightness-105 focus:outline-none text-sm md:text-base disabled:opacity-60">

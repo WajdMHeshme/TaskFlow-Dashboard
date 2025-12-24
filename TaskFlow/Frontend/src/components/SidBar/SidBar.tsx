@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { navItems } from "../navigator/navItem";
 import { logout as apiLogout } from "../../api/api";
 import { IoExitOutline } from "react-icons/io5";
@@ -11,6 +11,7 @@ type Props = {
 
 const Sidebar = ({ collapsed }: Props) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { i18n, t } = useTranslation();
   const isRTL = i18n.language === "ar";
 
@@ -43,15 +44,23 @@ const Sidebar = ({ collapsed }: Props) => {
         <nav className="space-y-2">
           {navItems.map((item) => {
             const Icon = item.icon;
+
+            // --- طريقة بديلة: مطابقة صارمة (exact) باستخدام location
+            // --- لو تحب تعتبر المسارات الفرعية تابعة (مثلاً /tasks/*) استخدم:
+            // const isActiveStartsWith = location.pathname.startsWith(item.path);
+
             return (
               <NavLink
                 key={item.path}
                 to={item.path}
+                end // <-- مهم: يجعل المطابقة exact (لا partial match)
                 title={t(item.nameKey)}
                 className={({ isActive }) =>
+                  // نستخدم isActive من NavLink (الذي يحترم end)،
+                  // أو نقدر نستخدم isExactActive بدل isActive لو حبيت override
                   `flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-white/10 transition
                    ${isActive ? "bg-emerald-600/30" : ""}
-                   ${collapsed ? "justify-center px-0" : ""}
+                   ${collapsed ? "justify-center px-0" : ""} 
                    ${isRTL ? "flex-row-reverse" : "flex-row"}`
                 }
               >

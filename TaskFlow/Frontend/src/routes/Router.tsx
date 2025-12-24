@@ -1,19 +1,23 @@
-import { createBrowserRouter, Navigate } from "react-router-dom";
-import App from "../App";
-import AuthLayout from "../pages/Auth/AuthLayout";
-import Login from "../pages/Auth/Login";
-import Register from "../pages/Auth/Register";
-import DashboardLayout from "../layout/DashboardLayout";
-import ProtectedRoute from "./protected/ProtectedRoute";
-import TasksPage from "../pages/Dashboard/TasksPage";
- import CreateProfilePage from "../pages/Dashboard/EditeProfilePage";
-import ProfilePage from "../pages/Dashboard/ProfilePage";
+import { createBrowserRouter, Navigate } from "react-router-dom"
+import App from "../App"
+import AuthLayout from "../pages/Auth/AuthLayout"
+import Login from "../pages/Auth/Login"
+import Register from "../pages/Auth/Register"
+import DashboardLayout from "../layout/DashboardLayout"
+import ProtectedRoute from "./protected/ProtectedRoute"
+import TasksPage from "../pages/Dashboard/Tasks/TasksPage"
+
+import CreateProfilePage from "../pages/Dashboard/Profile/CreateProfilePage"
+import ProfilePage from "../pages/Dashboard/Profile/ProfilePage"
+import CreateTaskPage from "../pages/Dashboard/Tasks/CreateTaskPage"
+import EditTaskPage from "../pages/Dashboard/Tasks/EditTaskPage"
+
 
 const router = createBrowserRouter([
   {
     element: <App />,
     children: [
-      // redirect root
+      // Redirect root
       { index: true, element: <Navigate to="/login" replace /> },
 
       // ---------- AUTH ----------
@@ -34,18 +38,18 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
         children: [
+          // Tasks
           { path: "tasks", element: <TasksPage /> },
-          {
-            path: "profile",
-            element: <ProfilePage />,
-          },
+          { path: "tasks/create", element: <CreateTaskPage /> }, // صفحة إنشاء التاسك
+          { path: "tasks/:id/edit", element: <EditTaskPage/> }, // صفحة إنشاء التاسك
 
-          // create / edit my profile
-           { path: "profile/create", element: <CreateProfilePage /> },
+          // Profile
+          { path: "profile", element: <ProfilePage /> },
+          { path: "profile/create", element: <CreateProfilePage /> },
         ],
       },
     ],
   },
-]);
+])
 
-export default router;
+export default router
