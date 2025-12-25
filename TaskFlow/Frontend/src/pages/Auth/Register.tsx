@@ -6,6 +6,8 @@ import { register } from "../../api/api";
 import { fetchAndCacheCurrentUser } from "../../api/user.api";
 import { showError, showSuccess } from "../../utils/toast/toastUtils/toastUtils";
 import { useTranslation } from "react-i18next";
+import { PiEyeBold } from "react-icons/pi";
+import { LuEyeClosed } from "react-icons/lu";
 
 export default function TaskMasterRegister(): JSX.Element {
   const { t } = useTranslation();
@@ -175,7 +177,7 @@ export default function TaskMasterRegister(): JSX.Element {
       <div className="w-full max-w-lg bg-[linear-gradient(180deg,#09221a,rgba(0,0,0,0.35))] rounded-3xl shadow-2xl overflow-hidden">
         <div className="p-8 md:p-12">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 rounded-lg bg-gradient-to-r from-emerald-400 to-emerald-600 flex items-center justify-center text-black font-bold text-lg shadow-sm">TF</div>
+            <div className="w-16 h-16 rounded-lg bg-linear-to-r from-emerald-400 to-emerald-600 flex items-center justify-center text-black font-bold text-lg shadow-sm">TF</div>
             <div>
               <h2 className="text-white text-2xl md:text-3xl font-bold">{t("create_account")}</h2>
               <p className="text-slate-300 text-sm md:text-base mt-1">{t("join_taskmaster")}</p>
@@ -201,7 +203,7 @@ export default function TaskMasterRegister(): JSX.Element {
               <span className="text-sm text-slate-300">{t("password")}</span>
               <div className="mt-2 relative">
                 <input value={password} onChange={(e) => setPassword(e.target.value)} type={showPassword ? "text" : "password"} placeholder="••••••••" required className="w-full rounded-2xl bg-[#071612] border border-transparent placeholder-slate-600 text-slate-100 px-5 py-3 pr-14 md:pr-16 focus:outline-none focus:ring-2 focus:ring-[#0fd67a]/40 text-sm md:text-base"/>
-                <button type="button" onClick={() => setShowPassword((s)=>!s)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 text-sm md:text-base">{showPassword ? t("hide") : t("show")}</button>
+                <button type="button" onClick={() => setShowPassword((s)=>!s)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 text-sm md:text-base">{showPassword ? <LuEyeClosed /> : <PiEyeBold />}</button>
               </div>
               <div className="mt-3">
                 <div className="w-full h-2 md:h-2.5 rounded-full bg-emerald-900/20 overflow-hidden">
@@ -215,7 +217,7 @@ export default function TaskMasterRegister(): JSX.Element {
               <span className="text-sm text-slate-300">{t("confirm_password")}</span>
               <div className="mt-2 relative">
                 <input value={confirm} onChange={(e)=>setConfirm(e.target.value)} type={showConfirm?"text":"password"} placeholder="••••••••" required className="w-full rounded-2xl bg-[#071612] border border-transparent placeholder-slate-600 text-slate-100 px-5 py-3 pr-14 md:pr-16 focus:outline-none focus:ring-2 focus:ring-[#0fd67a]/40 text-sm md:text-base"/>
-                <button type="button" onClick={()=>setShowConfirm((s)=>!s)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 text-sm md:text-base">{showConfirm ? t("hide") : t("show")}</button>
+                <button type="button" onClick={()=>setShowConfirm((s)=>!s)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 text-sm md:text-base">{showConfirm ? <LuEyeClosed /> : <PiEyeBold />}</button>
               </div>
             </label>
 
@@ -226,21 +228,9 @@ export default function TaskMasterRegister(): JSX.Element {
               </label>
             </div>
 
-            <div>
-              <label className="block text-sm text-slate-300 mb-2">{t("photo")}</label>
-              <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} />
-              {photoPreview && (
-                <div className="mt-3 flex items-center gap-3">
-                  <img src={photoPreview} alt="preview" className="w-16 h-16 rounded-full object-cover" />
-                  <div>
-                    <div className="text-sm text-slate-200">{fileName}</div>
-                    <button type="button" onClick={clearPhoto} className="text-xs text-emerald-300 hover:underline mt-1">Remove</button>
-                  </div>
-                </div>
-              )}
-            </div>
 
-            <button type="submit" disabled={loading} className="w-full inline-flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-[#0fe07a] to-[#11e079] text-black px-6 py-3 md:py-4 font-semibold shadow-[0_10px_30px_rgba(16,185,129,0.18)] hover:brightness-105 focus:outline-none text-sm md:text-base disabled:opacity-60">
+
+            <button type="submit" disabled={loading} className="w-full inline-flex items-center justify-center gap-3 rounded-full bg-linear-to-r from-[#0fe07a] to-[#11e079] text-black px-6 py-3 md:py-4 font-semibold shadow-[0_10px_30px_rgba(16,185,129,0.18)] hover:brightness-105 focus:outline-none text-sm md:text-base disabled:opacity-60">
               {loading ? t("creating") : t("create_account_btn")}
             </button>
 

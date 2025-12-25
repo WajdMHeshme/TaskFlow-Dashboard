@@ -2,6 +2,8 @@
 import api from './api'
 
 export type TaskPayload = {
+  favorites_count: number
+  is_favorite: any
   id: number
   user_id?: number
   title: string
@@ -46,4 +48,21 @@ export async function updateTask(
 // حذف تاسك
 export async function deleteTask(id: number): Promise<void> {
   await api.delete(`/tasks/${id}`)
+}
+
+
+//Add To Favorites
+export const toggleFavorite = async (taskId: number) => {
+  const res = await api.post(`/task/${taskId}/favorite`);
+  return res.data; // { task_id, is_favorite, favorites_count }
+};
+
+export const removeFavorite = async (taskId: number) => {
+  const res = await api.delete(`/task/${taskId}/favorite`);
+  return res.data; 
+}
+
+export const getFavoriteTasks = async (): Promise<TaskPayload[]> => {
+  const res = await api.get('/favorites')
+  return (res.data?.favorite_tasks ?? []) as TaskPayload[]
 }

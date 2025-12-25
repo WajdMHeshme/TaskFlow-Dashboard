@@ -11,7 +11,7 @@ import CreateProfilePage from "../pages/Dashboard/Profile/CreateProfilePage"
 import ProfilePage from "../pages/Dashboard/Profile/ProfilePage"
 import CreateTaskPage from "../pages/Dashboard/Tasks/CreateTaskPage"
 import EditTaskPage from "../pages/Dashboard/Tasks/EditTaskPage"
-
+import StarredTasksPage from "../pages/Dashboard/Tasks/StarredTasksPage"
 
 const router = createBrowserRouter([
   {
@@ -40,8 +40,9 @@ const router = createBrowserRouter([
         children: [
           // Tasks
           { path: "tasks", element: <TasksPage /> },
-          { path: "tasks/create", element: <CreateTaskPage /> }, // صفحة إنشاء التاسك
-          { path: "tasks/:id/edit", element: <EditTaskPage/> }, // صفحة إنشاء التاسك
+          { path: "tasks/create", element: <CreateTaskPage /> },
+          { path: "tasks/:id/edit", element: <EditTaskPage/> }, 
+          { path: "tasks/favorites", element: <StarredTasksPage/> }, 
 
           // Profile
           { path: "profile", element: <ProfilePage /> },

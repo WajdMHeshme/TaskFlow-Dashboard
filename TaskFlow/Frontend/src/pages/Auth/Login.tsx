@@ -6,6 +6,8 @@ import { login } from "../../api/api";
 import { fetchAndCacheCurrentUser } from "../../api/user.api";
 import { showError, showSuccess } from "../../utils/toast/toastUtils/toastUtils";
 import { useTranslation } from "react-i18next";
+import { LuEyeClosed } from "react-icons/lu";
+import { PiEyeBold } from "react-icons/pi";
 
 export default function TaskMasterLogin(): JSX.Element {
   const { t } = useTranslation();
@@ -134,10 +136,10 @@ export default function TaskMasterLogin(): JSX.Element {
                 <button
                   type="button"
                   onClick={() => setShowPassword((s) => !s)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 text-sm md:text-base"
                   aria-label={showPassword ? t("hide_password") ?? "Hide password" : t("show_password") ?? "Show password"}
                 >
-                  {showPassword ? "🙈" : "👁️"}
+                  {showPassword ? <LuEyeClosed /> : <PiEyeBold />}
                 </button>
               </div>
             </label>
