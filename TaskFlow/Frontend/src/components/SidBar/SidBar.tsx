@@ -4,14 +4,12 @@ import { logout as apiLogout } from "../../api/api";
 import { IoExitOutline } from "react-icons/io5";
 import { showSuccess } from "../../utils/toast/toastUtils/toastUtils";
 import { useTranslation } from "react-i18next";
+import type { SidBarProps } from "../../@types/types";
 
-type Props = {
-  collapsed: boolean;
-};
 
-const Sidebar = ({ collapsed }: Props) => {
+
+const Sidebar = ({ collapsed }: SidBarProps) => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { i18n, t } = useTranslation();
   const isRTL = i18n.language === "ar";
 

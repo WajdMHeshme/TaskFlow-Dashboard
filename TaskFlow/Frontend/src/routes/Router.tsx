@@ -12,6 +12,7 @@ import ProfilePage from "../pages/Dashboard/Profile/ProfilePage"
 import CreateTaskPage from "../pages/Dashboard/Tasks/CreateTaskPage"
 import EditTaskPage from "../pages/Dashboard/Tasks/EditTaskPage"
 import StarredTasksPage from "../pages/Dashboard/Tasks/StarredTasksPage"
+import Dashboard from "../pages/Dashboard/Dashboard"
 
 const router = createBrowserRouter([
   {
@@ -38,6 +39,7 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
         children: [
+          { index: true, element: <Dashboard /> },
           // Tasks
           { path: "tasks", element: <TasksPage /> },
           { path: "tasks/create", element: <CreateTaskPage /> },

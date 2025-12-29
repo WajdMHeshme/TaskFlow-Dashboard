@@ -125,7 +125,7 @@ export default function ProfileViewPage() {
                 to="/dashboard/profile/create"
                 className="text-sm px-3 py-1 rounded-md border border-[var(--Priamrygreen)] text-[var(--Priamrygreen)] hover:bg-[var(--Priamrygreen)] hover:text-[var(--bg-dark)] transition"
               >
-                Edit
+                Create
               </Link>
               <button
                 onClick={() => navigate(-1)}

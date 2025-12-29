@@ -1,17 +1,7 @@
 // src/api/tasks.api.ts
+import type {  TaskPayload } from '../@types/types'
 import api from './api'
 
-export type TaskPayload = {
-  favorites_count: number
-  is_favorite: any
-  id: number
-  user_id?: number
-  title: string
-  description?: string | null
-  priority?: string | null
-  created_at?: string | null
-  updated_at?: string | null
-}
 
 // جلب كل التاسكات
 export async function getTasks(): Promise<TaskPayload[]> {

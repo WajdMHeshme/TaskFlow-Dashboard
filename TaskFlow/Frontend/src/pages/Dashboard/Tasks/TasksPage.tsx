@@ -178,7 +178,7 @@ export default function TasksPage(): JSX.Element {
       ) : (
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
           {tasks.map((task) => (
-            <article key={task.id} className="relative group p-4 bg-[var(--bg-card)] rounded-lg shadow border border-[var(--bg-side)] overflow-hidden cursor-pointer" onClick={() => navigate(`/dashboard/tasks/${task.id}`)}>
+            <article key={task.id} className="relative group p-4 bg-[var(--bg-card)] rounded-lg shadow border border-[var(--bg-side)] overflow-hidden cursor-pointer">
               <div className="absolute inset-0 bg-[rgba(0,0,0,0.45)] backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3 z-10 pointer-events-none group-hover:pointer-events-auto">
                 <div className="flex gap-2">
                   <button onClick={(e) => { e.stopPropagation(); navigate(`/dashboard/tasks/${task.id}/edit`) }} className="px-3 py-1.5 text-xs  text-black rounded hover:scale-105 transition-transform cursor-pointer" aria-label="Edit task">

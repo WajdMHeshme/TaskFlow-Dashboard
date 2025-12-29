@@ -1,18 +1,8 @@
 // src/api/profile.api.ts
+import type { ProfilePayload } from '../@types/types'
 import api from './api'
 
-export type ProfilePayload = {
-  date: string | null | undefined
-  data: ProfilePayload
-  id?: number
-  user_id?: number
-  name?: string | null
-  bio?: string | null
-  info?: string | null
-  image?: string | null
-  created_at?: string | null
-  updated_at?: string | null
-}
+
 
 // جلب بروفايل حسب id (موجود حالياً)
 export async function getProfileById(id: number): Promise<ProfilePayload> {

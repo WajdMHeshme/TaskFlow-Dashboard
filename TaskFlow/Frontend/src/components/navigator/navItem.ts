@@ -3,12 +3,8 @@ import { AiOutlineFolder, AiOutlineCheckCircle, AiOutlineSetting } from "react-i
 import { IoTrashSharp } from "react-icons/io5";
 import { MdDashboard } from "react-icons/md";
 import { TbTagStarred } from "react-icons/tb";
+import type { NavItem } from "../../@types/types";
 
-export interface NavItem {
-  nameKey: string; // مفتاح الترجمة
-  path: string;
-  icon: IconType;
-}
 
 export const navItems: NavItem[] = [
   { nameKey: "dashboard", path: "/dashboard", icon: MdDashboard },

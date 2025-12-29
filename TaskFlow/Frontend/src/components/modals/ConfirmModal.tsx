@@ -1,18 +1,7 @@
 // src/components/ConfirmModal.tsx
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
+import type {ModalProps} from '../../@types/types'
 
-type Props = {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  title?: string;
-  description?: string;
-  icon?: React.ReactNode;
-  confirmLabel?: string;
-  cancelLabel?: string;
-  loading?: boolean;
-  variant?: "danger" | "primary" | "neutral";
-};
 
 export default function ConfirmModal({
   isOpen,
@@ -25,7 +14,7 @@ export default function ConfirmModal({
   cancelLabel = "إلغاء",
   loading = false,
   variant = "danger",
-}: Props) {
+}: ModalProps) {
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const confirmRef = useRef<HTMLButtonElement | null>(null);
 

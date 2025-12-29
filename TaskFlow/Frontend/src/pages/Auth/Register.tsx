@@ -18,9 +18,9 @@ export default function TaskMasterRegister(): JSX.Element {
   const [confirm, setConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [, setPhotoPreview] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [fileName, setFileName] = useState<string | null>(null);
+  const [, setFileName] = useState<string | null>(null);
   const [agree, setAgree] = useState(false);
 
   const fileRef = useRef<HTMLInputElement | null>(null);
@@ -42,16 +42,6 @@ export default function TaskMasterRegister(): JSX.Element {
   const strengthPct = `${(strength / 5) * 100}%`;
   const strengthLabel = t("password_strength")[strength];
 
-  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files && e.target.files[0];
-    if (!f) return;
-    setFileName(f.name);
-    setPhotoFile(f);
-
-    const reader = new FileReader();
-    reader.onload = (ev) => setPhotoPreview(ev.target?.result as string);
-    reader.readAsDataURL(f);
-  }
 
   function clearPhoto() {
     setPhotoPreview(null);

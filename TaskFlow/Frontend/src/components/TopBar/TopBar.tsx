@@ -4,13 +4,11 @@ import { IoLanguage, IoMenu } from 'react-icons/io5'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { getCurrentUser, type CurrentUserPayload } from '../../api/user.api'
+import type { TopBarProps } from '../../@types/types'
 
-type Props = {
-  collapsed: boolean
-  onToggle: () => void
-}
 
-const Topbar = ({ onToggle }: Props) => {
+
+const Topbar = ({ onToggle }: TopBarProps) => {
   const { t, i18n } = useTranslation()
 
   // local state for user (show immediately from localStorage if present)
